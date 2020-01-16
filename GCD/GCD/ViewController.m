@@ -20,7 +20,7 @@
  3.包含的任务使用sync
  */
 
-// 造成死锁      
+// 造成死锁
 // 原因：任务2在等任务3执行完毕，任务3又在等任务2执行完毕
 // 1.包含：任务0中包含了任务2(任务1，2，3 算任务0）
 // 2.串行：任务0，任务2 都在主队列, 同一队列
@@ -207,4 +207,21 @@
 }
 
 
+/**
+ performSelector方法的本质是在RunLoop上添加Timer
+ 但是子线程默认是不会开起RunLoop的，所以子线程中使用performSelector方法，是无效的
+ */
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    dispatch_queue_t queue = dispatch_get_global_queue(0, 0);
+    
+    dispatch_async(queue, ^{
+        NSLog(@"1");
+        [self performSelector:@selector(test) withObject:nil afterDelay:.0];
+        NSLog(@"3");
+    });
+}
+
+- (void)test {
+    NSLog(@"2");
+}
 @end
